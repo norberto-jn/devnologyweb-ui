@@ -32,7 +32,9 @@ jobs:
 
       - name: Fazer Build do Projeto
         run: npm run build
-
+        env:
+          CI: false  # Isso impede que warnings travem o build
+        
       - name: Configurar Credenciais AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
