@@ -1,0 +1,54 @@
+name: Deploy Web UI to S3
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  S3_BUCKET_NAME: "devnologyweb-ui"
+  AWS_REGION: "us-east-1"
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci
+
+      - name: Fazer Build do Projeto
+        run: npm run build
+
+      - name: Configurar Credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::778827839607:role/role_prod-devnologyweb-ui
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sincronizar Pasta 'build/' com S3
+        run: |
+          echo "Sincronizando S3..."
+          # Verificação sênior: React Scripts usa 'build', não 'dist'
+          if [ ! -d "./build" ]; then
+            echo "ERRO: Pasta 'build/' não encontrada!"
+            ls -la
+            exit 1
+          fi
+          
+          # Sync com o bucket
+          aws s3 sync ./build/ s3://${{ env.S3_BUCKET_NAME }} --delete
+          echo "Deploy no S3 concluído com sucesso!"
