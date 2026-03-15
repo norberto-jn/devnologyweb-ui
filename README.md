@@ -57,3 +57,4 @@ Caso encontre problemas, verifique os logs dos containers com:
 ```bash
 docker compose logs
 ```
+.
