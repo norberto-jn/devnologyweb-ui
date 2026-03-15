@@ -60,7 +60,7 @@ function LoginPage() {
         password: md5(formData.password)
       };
 
-      const response = await axios.post("http://localhost:3001/person", userData, {
+      await axios.post("http://localhost:3001/person", userData, {
         headers: {
           "Content-Type": "application/json",
         }
